@@ -7,7 +7,7 @@ global:
 
 # Load and evaluate rules in this file every 'evaluation_interval' seconds.
 rule_files:
-- 'alert.rules'
+- '*.rules.yml'
 
 scrape_configs:
 - job_name: 'prometheus'
@@ -22,18 +22,16 @@ scrape_configs:
   static_configs:
   - targets: ['speedtest:9798']
 
-- job_name: 'ping'
+- job_name: 'http_ping'
   metrics_path: /probe
   scrape_interval: 5s
   params:
-    module: [http_2xx]  # Look for a HTTP 200 response.
+    module: [http_2xx]  # Look for a HTTP 2xx response.
   static_configs:
   - targets:  # url;humanname;routing;switch
-    - https://www.reddit.com/;reddit.com;external;internetbox
+    - https://www.google.com/;google.com;external;internetbox
     - https://github.com/;github.com;external;internetbox
     - http://192.168.1.111;pihole;local;internetbox
-    # - http://192.168.1.42;blackdata;local;orbirouter-attic
-    # - http://192.168.1.101;orbirouter;local;orbirouter
   relabel_configs:
   - source_labels: [__address__]
     regex: '(.*);(.*);(.*);(.*)'  #first is the url, thus unique for instance
@@ -55,6 +53,44 @@ scrape_configs:
     target_label: __param_target
   - target_label: __address__
     replacement: ping:9115  # The blackbox exporter's real hostname:port.
+
+- job_name: 'ping'
+  metrics_path: /probe
+  scrape_interval: 5s
+  params:
+    module: [icmp]
+  static_configs:
+  - targets:  # url;humanname;routing;switch
+    - 192.168.1.111;pihole;local;internetbox
+    - 192.168.1.1;er4;local;internetbox
+  relabel_configs:
+  - source_labels: [__address__]
+    regex: '(.*);(.*);(.*);(.*)'
+    target_label: instance
+    replacement: $1
+  - source_labels: [__address__]
+    regex: '(.*);(.*);(.*);(.*)'
+    target_label: humanname
+    replacement: $2
+  - source_labels: [__address__]
+    regex: '(.*);(.*);(.*);(.*)'
+    target_label: routing
+    replacement: $3
+  - source_labels: [__address__]
+    regex: '(.*);(.*);(.*);(.*)'
+    target_label: switching
+    replacement: $4
+  - source_labels: [instance]
+    target_label: __param_target
+  - target_label: __address__
+    replacement: ping:9115
+
+- job_name: 'blackbox'
+  scrape_interval: 5s
+  metrics_path: /metrics
+  static_configs:
+  - targets:
+    - ping:9115
 
 - job_name: 'nodeexp'
   static_configs:

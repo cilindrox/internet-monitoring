@@ -20,10 +20,10 @@ services:
 
   grafana:
     image: grafana/grafana:7.5.7
-    restart: always
+    restart: unless-stopped
     volumes:
     - grafana_data:/var/lib/grafana
-    - ./grafana/provisioning/:/etc/grafana/provisioning/
+    - ./grafana/provisioning/:/etc/grafana/provisioning/:ro
     depends_on:
     - prometheus
     ports:
@@ -44,9 +44,9 @@ services:
     ports:
     - 9115:9115
     image: prom/blackbox-exporter:v0.19.0
-    restart: always
+    restart: unless-stopped
     volumes:
-    - ./blackbox/config:/config
+    - ./blackbox/config:/config:ro
     networks:
     - backend
 
@@ -58,7 +58,7 @@ services:
   #   ports:
   #   - 9798:9798
   #   image: miguelndecarvalho/speedtest-exporter
-  #   restart: always
+  #   restart: unless-stopped
   #   networks:
   #   - backend
 
@@ -71,7 +71,7 @@ services:
   #   - /:/rootfs:ro
   #   ports:
   #   - 9100:9100
-  #   restart: always
+  #   restart: unless-stopped
   #   command:
   #   - '--path.procfs=/host/proc'
   #   - '--path.sysfs=/host/sys'
