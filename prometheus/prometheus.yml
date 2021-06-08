@@ -29,8 +29,8 @@ scrape_configs:
     module: [http_2xx]  # Look for a HTTP 2xx response.
   static_configs:
   - targets:  # url;humanname;routing;switch
-    - https://www.google.com/;google.com;external;internetbox
-    - https://github.com/;github.com;external;internetbox
+    - https://1.1.1.1;1.1.1.1;external;internetbox
+    - https://github.com;github.com;external;internetbox
     - http://192.168.1.111;pihole;local;internetbox
   relabel_configs:
   - source_labels: [__address__]
